@@ -5,8 +5,11 @@
 #include<iostream>
 using namespace std;
 
+const int RAY_NUM = 300; 
+const float PI = 3.14159265f;
+
 int main() {
-    const int width = 1280, height = 760;
+    const int width = 1100, height = 760;
     sf::RenderWindow window(sf::VideoMode(width, height), "Ray Tracer");
 
     // Create image -> texture -> sprite
@@ -19,12 +22,13 @@ int main() {
     sf::Sprite sprite(texture);
 
     // Create a circle
-    sf::CircleShape circle(40);
+    sf::CircleShape circle(20);
     circle.setFillColor(sf::Color::White);
-    circle.setOrigin({-30, -60});
+    circle.setOrigin({5, 5});
 
     sf::Vector2f dragOffset ;
     bool isDragging = false;
+
 
     while (window.isOpen()) {
         sf::Event event;
@@ -67,9 +71,21 @@ int main() {
         }
         window.clear();
         window.draw(sprite);
+        for(int i =0 ; i<RAY_NUM ;i++){
+
+            float angle = (2*PI / RAY_NUM )*i;
+    
+            sf::Vector2f direction = sf::Vector2f(std::cos(angle) , std::sin(angle));
+    
+            for(float step = 0 ; step <1000 ; step+=1.0f){
+    
+                sf::Vector2f point = circle.getPosition() + direction * step;
+                sf::Vertex pixel(point, sf::Color::Yellow);
+                window.draw(&pixel, 1, sf::Points);
+            }
+    
+        }
         window.draw(circle);
         window.display();
     }
-    
- 
 }
