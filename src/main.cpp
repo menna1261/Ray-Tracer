@@ -8,6 +8,25 @@ using namespace std;
 const int RAY_NUM = 300; 
 const float PI = 3.14159265f;
 
+
+bool isColliding(sf::Vector2f point , sf::CircleShape circle2 ){
+    
+    sf::Vector2f circle2Pos = circle2.getPosition(); // center
+    float radius2 = circle2.getRadius();
+
+    sf::Vector2f diff = point - circle2Pos;
+    float distanceSquared = diff.x * diff.x + diff.y * diff.y;
+    float radiusSquared = radius2 * radius2;
+
+    if (distanceSquared <= radiusSquared) {
+        return true;
+}
+    return false;
+    
+}
+
+
+
 int main() {
     const int width = 1100, height = 760;
     sf::RenderWindow window(sf::VideoMode(width, height), "Ray Tracer");
@@ -21,13 +40,21 @@ int main() {
 
     sf::Sprite sprite(texture);
 
-    // Create a circle
+    // Create a light source
     sf::CircleShape circle(20);
     circle.setFillColor(sf::Color::White);
-    circle.setOrigin({5, 5});
+    circle.setOrigin({20,20});
+    circle.setPosition({432,231});
+
+    //Create an object 
+    sf::CircleShape circle2 (80);
+    circle2.setFillColor(sf::Color::White);
+    circle2.setOrigin({80,80});
+    circle2.setPosition({659,346});
 
     sf::Vector2f dragOffset ;
     bool isDragging = false;
+    bool isDragging2 = false;
 
 
     while (window.isOpen()) {
@@ -53,20 +80,32 @@ int main() {
                     isDragging = true;
                     dragOffset = circle.getPosition()- MousePos;
                 }
+
+                if(circle2.getGlobalBounds().contains({MouseX,MouseY})){
+                    isDragging2 = true;
+                    dragOffset = circle2.getPosition()-MousePos;
+                }
             }
 
             if(event.type == sf::Event::MouseButtonReleased ){
 
                 isDragging = false;
+                isDragging2 = false;
             }
 
+            float MouseX = float(sf::Mouse::getPosition(window).x);
+            float MouseY =  float(sf::Mouse::getPosition(window).y);
+
+            sf::Vector2f MousePos = {MouseX ,MouseY};
+
             if(isDragging){
-
-                float MouseX = float(sf::Mouse::getPosition(window).x);
-                float MouseY =  float(sf::Mouse::getPosition(window).y);
-
-                sf::Vector2f MousePos = {MouseX ,MouseY};
                 circle.setPosition(MousePos + dragOffset);
+                std::cout<<"lightX : "<<circle.getPosition().x <<" "<<"lightY : "<<circle.getPosition().y<<std::endl;
+            }
+
+            if (isDragging2){
+                circle2.setPosition(MousePos + dragOffset);
+                std::cout<<"tX : "<<circle2.getPosition().x <<" "<<"tY : "<<circle2.getPosition().y<<std::endl;
             }
         }
         window.clear();
@@ -77,15 +116,25 @@ int main() {
     
             sf::Vector2f direction = sf::Vector2f(std::cos(angle) , std::sin(angle));
     
-            for(float step = 0 ; step <1000 ; step+=1.0f){
+            for(float step = 0 ; step <1500 ; step+=1.0f){
     
                 sf::Vector2f point = circle.getPosition() + direction * step;
-                sf::Vertex pixel(point, sf::Color::Yellow);
-                window.draw(&pixel, 1, sf::Points);
+
+                if(!isColliding(point , circle2))
+                {
+                    sf::Vertex pixel(point, sf::Color::Yellow);
+                    window.draw(&pixel, 1, sf::Points); 
+                }
+                else
+                {
+                    break;
+                }              
             }
     
         }
         window.draw(circle);
+        window.draw(circle2);
         window.display();
     }
+
 }
