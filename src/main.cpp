@@ -5,11 +5,12 @@
 #include <SFML/Window.hpp>
 using namespace std;
 
-const int RAY_NUM = 200;
+const int RAY_NUM = 300;
 const float PI = 3.14159265f;
 const int width = 1100, height = 760;
 sf::RenderWindow window(sf::VideoMode(width, height), "Ray Tracer");
 
+//Check if the ray's pixel is colliding with the circle2
 bool isColliding(sf::Vector2f point, sf::CircleShape circle2)
 {
     sf::Vector2f circle2Pos = circle2.getPosition(); // center
@@ -73,10 +74,8 @@ int main()
     // Create image -> texture -> sprite
     sf::Image image;
     image.create(width, height, sf::Color::Black);
-
     sf::Texture texture;
     texture.loadFromImage(image);
-
     sf::Sprite sprite(texture);
 
     // Create a light source
@@ -95,6 +94,7 @@ int main()
     bool isDragging = false;
     bool isDragging2 = false;
 
+    //Main loop
     while (window.isOpen())
     {
         sf::Event event;
@@ -130,6 +130,7 @@ int main()
                 }
             }
 
+            //Checkk If we are dropping the circle
             if (event.type == sf::Event::MouseButtonReleased)
             {
                 isDragging = false;
@@ -155,6 +156,7 @@ int main()
         window.clear();
         window.draw(sprite);
 
+        //Drawing the Rays out of the light source
         for (int i = 0; i < RAY_NUM; i++)
         {
             float angle = (2 * PI / RAY_NUM) * i;
@@ -167,7 +169,13 @@ int main()
                 if (!isColliding(point, circle2))
                 {
                     sf::Vertex pixel(point, sf::Color::Yellow);
+                    //To make it blurry like real light 
+                    //sf::Vertex pixel2({point.x +5 , point.y+5}, sf::Color::White);
+                    //sf::Vertex pixel3({point.x -5 , point.y-5}, sf::Color::White);
                     window.draw(&pixel, 1, sf::Points);
+                    //window.draw(&pixel2, 1, sf::Points);
+                    //window.draw(&pixel3, 1, sf::Points);
+
                 }
  
                 else
