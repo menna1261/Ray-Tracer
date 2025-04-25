@@ -24,13 +24,14 @@ The template starts out very basic, but might receive additional features over t
        libxcursor-dev \
        libxi-dev \
        libudev-dev \
-       libfreetype-dev \
        libflac-dev \
        libvorbis-dev \
        libgl1-mesa-dev \
        libegl1-mesa-dev \
        libfreetype-dev
    ```
+On NixOS: use the providede shell.nix
+
 8. Configure and build your project. Most popular IDEs support CMake projects with very little effort on your part.
 
    - [VS Code](https://code.visualstudio.com) via the [CMake extension](https://code.visualstudio.com/docs/cpp/cmake-linux)
