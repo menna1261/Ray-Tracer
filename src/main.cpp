@@ -7,7 +7,7 @@
 #include <chrono>
 using namespace std;
 
-#define RAYTRACER false
+#define RAYTRACER true
 const int RAY_NUM = 300;
 #define PI 3.14159265358979323846f
 const int width = 1100, height = 760;
@@ -289,34 +289,67 @@ int main()
         window.draw(sprite);
 
 #if RAYTRACER == true
+        // Step 1: a RenderTexture that covers the whole screen
+        sf::RenderTexture render_texture;
+        // use the screen width and height
+        render_texture.create(width, height);
+        
+        render_texture.clear(sf::Color::Transparent);
+        render_texture.display();
+        // Step 2: Get texture as image
+        sf::Image image = render_texture.getTexture().copyToImage();
+        
         //Drawing the Rays out of the light source
         for (int i = 0; i < RAY_NUM; i++)
         {
             float angle = (2 * PI / RAY_NUM) * i;
             sf::Vector2f direction = sf::Vector2f(std::cos(angle), std::sin(angle));
-
+            
             for (float step = 0; step < 1500; step += 1.0f)
             {
                 sf::Vector2f point = circle.getPosition() + direction * step;
-
+                
                 if (!isColliding(point, circle2))
                 {
-                    sf::Vertex pixel(point, sf::Color::Yellow);
-                    //To make it blurry like real light 
-                    //sf::Vertex pixel2({point.x +5 , point.y+5}, sf::Color::White);
-                    //sf::Vertex pixel3({point.x -5 , point.y-5}, sf::Color::White);
-                    window.draw(&pixel, 1, sf::Points);
-                    //window.draw(&pixel2, 1, sf::Points);
-                    //window.draw(&pixel3, 1, sf::Points);
+                    if (point.x < 0 || point.x > width || point.y < 0 || point.y > height)
+                    {
+                        break;
+                    }
+                    image.setPixel(point.x, point.y, sf::Color::Yellow);
 
+                    // blur using a for loop, be aware that this costs performance
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        int offset = j;
+                        if (point.x + offset < width && point.y + offset < height) {
+                            image.setPixel(point.x + offset, point.y + offset, sf::Color::Yellow);
+                        }
+                        
+                        if (point.x - offset > 0 && point.y - offset > 0) {
+                            image.setPixel(point.x - offset, point.y - offset, sf::Color::Yellow);
+                        }
+                    }
+                    
                 }
- 
+                
                 else
                 {
                     break;
                 }
             }
         }
+
+        // Step 4: Convert back to texture
+        sf::Texture texture;
+        texture.loadFromImage(image);
+        sf::Sprite sprite(texture);
+        // the sprite cover the whole screen, no need to change the position
+        sprite.setPosition(0,0);
+        sprite.setOrigin(0, 0);
+        
+
+        window.draw(sprite, sf::RenderStates(sf::BlendAdd));
 #else
         draw_light_emission(circle, circle2, 500);
 #endif
