@@ -118,12 +118,13 @@ void draw_light_emission(sf::CircleShape light_source, sf::CircleShape shadow_ob
     //Drawing the Rays out of the light source
 
     //We can draw a big circle in a texture and then cut out the shadow parts
-    // Step 1: Draw a circle to a RenderTexture
     sf::RenderTexture render_texture;
-    render_texture.create(1024, 1024); // the higher the resolution the better, but also the slower
+    render_texture.create(width, height);
     
+    // Step 1: Draw a circle to a RenderTexture
     sf::CircleShape light_emission(light_strength);
-    light_emission.setPosition(0, 0);
+    light_emission.setPosition(light_source.getPosition());
+    light_emission.setOrigin(light_strength, light_strength);
     light_emission.setFillColor(sf::Color::Yellow);
     light_emission.setRadius(light_strength);
     light_emission.setPointCount(500); // number of points in the circle, results in smoother circle
@@ -143,17 +144,12 @@ void draw_light_emission(sf::CircleShape light_source, sf::CircleShape shadow_ob
     sf::Vector2f shadow_position = shadow_object.getPosition();
     float shadow_radius = shadow_object.getRadius();
 
-    // Inverse transform
-    sf::Transform inverse;
-    inverse.translate(-light_position.x + light_strength, -light_position.y + light_strength);
-
     // Loop over all pixels
     for (unsigned int y = 0; y < image.getSize().y; ++y) {
         for (unsigned int x = 0; x < image.getSize().x; ++x) {
             sf::Vector2f local_pixel(x, y);
-            sf::Vector2f global_pixel = inverse.getInverse().transformPoint(local_pixel);
 
-            if (is_in_shadow_cone(global_pixel, light_position, shadow_position, shadow_radius)) {
+            if (is_in_shadow_cone(local_pixel, light_position, shadow_position, shadow_radius)) {
                 image.setPixel(x, y, sf::Color::Transparent);
             }
         }
@@ -163,8 +159,6 @@ void draw_light_emission(sf::CircleShape light_source, sf::CircleShape shadow_ob
     sf::Texture texture;
     texture.loadFromImage(image);
     sf::Sprite sprite(texture);
-    sprite.setPosition(light_source.getPosition());
-    sprite.setOrigin(light_strength, light_strength);
     
 
     window.draw(sprite, sf::RenderStates(sf::BlendAdd));
